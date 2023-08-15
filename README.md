@@ -34,5 +34,5 @@ CRust is licensed under the MPL v2 License. See [LICENSE](LICENSE) for more deta
 
 For questions, suggestions, or feedback, feel free to reach out:
 
-- GitHub Issues: [Project Issues](https://github.com/your-username/CRust/issues)
+- GitHub Issues: [Project Issues](https://github.com/CubesCoders/crust-gui/issues)
 - Discord: @cubecoder
