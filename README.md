@@ -2,6 +2,8 @@
 
 CRust is a project manager written in Rust and built using Tauri. It allows you to efficiently manage your projects, workspaces, and project types. With a user-friendly graphical interface, CRust streamlines your project organization and development workflow.
 
+Note: Not yet tested on linux and mac (view progress on [this issue](https://github.com/CubesCoders/crust-gui/issues/2))
+
 ## Features
 
 - Add workspaces with project directories matching project type configurations.
