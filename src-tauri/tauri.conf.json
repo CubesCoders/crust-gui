@@ -43,7 +43,7 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
-      "identifier": "com.tauri.dev",
+      "identifier": "com.cubecoder.dev",
       "longDescription": "",
       "macOS": {
         "entitlements": null,
