@@ -48,7 +48,7 @@
 
 
 <div class="absolute top-0 left-0 w-full h-full backdrop-filter backdrop-blur-sm bg-background/80 hidden z-40" bind:this={modal_background}>
-    <div class="w-2/4 max-w-sm h-screen bg-background border-e p-5 transition-transform duration-300 -translate-x-full" bind:this={modal}>
+    <div class="w-3/4 max-w-sm h-screen bg-background border-e p-5 transition-transform duration-300 -translate-x-full" bind:this={modal}>
         <button class="float-right" on:click={close}><XIcon /></button>
         <p class="text-lg font-semibold">Add Project Type</p>
         <span class="clear-both"></span>
