@@ -31,7 +31,7 @@
     "bundle": {
       "active": true,
       "category": "DeveloperTool",
-      "copyright": "",
+      "copyright": "Markus Hamacher 2023",
       "deb": {
         "depends": []
       },
@@ -72,7 +72,7 @@
         "fullscreen": false,
         "height": 600,
         "resizable": true,
-        "title": "crust-gui",
+        "title": "CRust",
         "width": 800
       }
     ]

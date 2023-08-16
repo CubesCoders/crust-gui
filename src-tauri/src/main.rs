@@ -30,8 +30,13 @@ impl MyAppState {
 #[tauri::command]
 fn get_drives() -> Vec<String> {
     let sys = System::new_all();
+    println!("{}", sys.name().unwrap());
 
-    sys.disks().iter().map(|d| d.mount_point().to_string_lossy().to_string().split_at(2).0.to_string()).collect()
+    sys.disks().iter().map(|d| if sys.name().unwrap().as_str() != "Windows" {
+        d.mount_point().to_string_lossy().to_string()
+    } else {
+        d.mount_point().to_string_lossy().to_string().split_at(2).0.to_string() // Remove double slash from mount point
+    }).collect()
 }
 
 #[tauri::command]
@@ -164,7 +169,6 @@ fn exit(app_state: State<AppState>, window: tauri::Window) {
 fn main() {
     tauri::Builder::default()
         .setup(|app| {
-            // TODO: load lua plugins
             Ok(())
         })
         .manage(AppState(Arc::new(Mutex::new(MyAppState::new()))))
