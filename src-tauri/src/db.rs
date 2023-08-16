@@ -111,7 +111,7 @@ impl From<String> for Workspace {
     fn from(path: String) -> Self {
         let id = hash(&path);
         let path_binding = path.clone();
-        let name = path_binding.split("\\").last().unwrap_or_default();
+        let name = path_binding.split("/").last().unwrap_or_default();
         Workspace { id: id.to_string(), path: path, name: name.to_string(), projects: None }
     }
 }
@@ -134,8 +134,8 @@ impl From<String> for Project {
     fn from(path: String) -> Self {
         let id = hash(&path);
         let path_binding = path.clone();
-        let name = path_binding.split("\\").last().unwrap_or_default();
-        let workspace = path_binding.split("\\").enumerate().filter(|(i, _)| *i != path_binding.split("\\").count() - 1).map(|(_, g)| g).collect::<Vec<&str>>().join("\\");
+        let name = path_binding.split("/").last().unwrap_or_default();
+        let workspace = path_binding.split("/").enumerate().filter(|(i, _)| *i != path_binding.split("/").count() - 1).map(|(_, g)| g).collect::<Vec<&str>>().join("/");
         Project { id: id.to_string(), name: name.to_string(), workspace_id: hash(workspace).to_string(), metadata: "".to_owned() }
     }
 }

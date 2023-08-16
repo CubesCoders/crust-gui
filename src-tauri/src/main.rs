@@ -8,7 +8,7 @@ use std::{env, sync::{Arc, Mutex}, path::PathBuf, process::Command};
 use config::Config;
 use db::{DB, Workspace, Project, hash};
 use sysinfo::{System, SystemExt, DiskExt};
-use tauri::{State, Manager};
+use tauri::State;
 
 mod db;
 mod config;
@@ -30,7 +30,6 @@ impl MyAppState {
 #[tauri::command]
 fn get_drives() -> Vec<String> {
     let sys = System::new_all();
-    println!("{}", sys.name().unwrap());
 
     sys.disks().iter().map(|d| if sys.name().unwrap().as_str() != "Windows" {
         d.mount_point().to_string_lossy().to_string()
@@ -52,8 +51,8 @@ fn get_workspaces(app_state: State<AppState>) -> Vec<Workspace> {
 
 #[tauri::command]
 fn add_workspace(path: String, app_state: State<AppState>) {
-    let workspace: Workspace = if path.ends_with("\\") { 
-        path.split("\\").enumerate().filter(|(i, _)| *i != path.split("\\").count() -1).map(|(_, g)| g).collect::<Vec<&str>>().join("\\").into()
+    let workspace: Workspace = if path.ends_with("/") { 
+        path.split("/").enumerate().filter(|(i, _)| *i != path.split("/").count() -1).map(|(_, g)| g).collect::<Vec<&str>>().join("/").into()
     } else {
         path.clone().into()
     };
@@ -168,7 +167,7 @@ fn exit(app_state: State<AppState>, window: tauri::Window) {
 
 fn main() {
     tauri::Builder::default()
-        .setup(|app| {
+        .setup(|_app| {
             Ok(())
         })
         .manage(AppState(Arc::new(Mutex::new(MyAppState::new()))))

@@ -8,9 +8,9 @@
 
     let path = [""];
     let cur_path = () => {
-        return path.join("\\") + "\\";
+        return path.join("/") + "/";
     };
-    $: path_str = path.join("\\") + "\\";
+    $: path_str = path.join("/") + "/";
     let dirs: Promise<FileEntry[]> = get_dir("");
     let drives: string[] = [];
     let path_input: HTMLInputElement;
@@ -42,9 +42,9 @@
         e: Event & { currentTarget: EventTarget & HTMLInputElement }
     ) {
         const inputValue = e.currentTarget.value;
-        const lastSlashIndex = inputValue.lastIndexOf("\\");
+        const lastSlashIndex = inputValue.lastIndexOf("/");
         if (lastSlashIndex !== -1) {
-            path = inputValue.slice(0, lastSlashIndex).split("\\");
+            path = inputValue.slice(0, lastSlashIndex).split("/");
         }
         dirs = get_dir(cur_path());
         path_str_copy = cur_path();
