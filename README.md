@@ -44,55 +44,53 @@ For questions, suggestions, or feedback, feel free to reach out:
 In the root directory you can find or create a config.json file where the project types are stored.
 Because there are no pre-defined project types the config will be empty and thus no projects from workspaces will be added.
 Here is a config.json example that you can use:
+
 ```json
 {
-  "project_types": [
-    {
-      "id": "0",
-      "name": "rust [bin]",
-      "needed_files": [
-        "Cargo.toml",
-        "src/main.rs"
-      ],
-      "color": "#f74b00"
-    },
-    {
-      "id": "1",
-      "name": "tauri",
-      "needed_files": [
-        "src-tauri/tauri.conf.json",
-        "src-tauri/src/main.rs",
-        "src-tauri/Cargo.toml"
-      ],
-      "color": "#23a8b7"
-    },
-    {
-      "id": "2",
-      "name": "godot",
-      "needed_files": [
-        "project.godot"
-      ],
-      "color": "#4489bb"
-    },
-    {
-      "id": "3",
-      "name": "rust [lib]",
-      "needed_files": [
-        "Cargo.toml",
-        "src/lib.rs"
-      ],
-      "color": "#f74b00"
-    },
-    {
-      "id": "4",
-      "name": "Web",
-      "needed_files": [
-        "index.html"
-      ],
-      "color": "#fff"
-    }
-  ]
+    "project_types": [
+        {
+            "id": "0fec17a3-8e64-4e2f-b776-2d021c84a201",
+            "name": "rust [bin]",
+            "needed_files": ["Cargo.toml", "src/main.rs"],
+            "color": "#f74b00",
+            "run_config_id": ""
+        },
+        {
+            "id": "cacf267a-308b-49f1-b391-5e34725273cd",
+            "name": "rust [lib]",
+            "needed_files": ["Cargo.toml", "src/lib.rs"],
+            "color": "#f74b00",
+            "run_config_id": ""
+        },
+        {
+            "id": "2e861659-9ec2-4c49-9dfe-4b09d6083b03",
+            "name": "godot",
+            "needed_files": ["project.godot"],
+            "color": "#4489bb",
+            "run_config_id": ""
+        },
+        {
+            "id": "e60824b0-69ee-4ee4-801a-3ad645c8b5f0",
+            "name": "tauri",
+            "needed_files": [
+                "src-tauri/tauri.conf.json",
+                "src-tauri/src/main.rs",
+                "src-tauri/Cargo.toml"
+            ],
+            "color": "#23a8b7",
+            "run_config_id": ""
+        }
+    ],
+    "run_configs": [
+        { "id": "0", "name": "vscode", "commands": "code $PPATH" },
+        {
+            "id": "1",
+            "name": "tauri",
+            "commands": "code $PPATH\ncode $PPATH/src-tauri"
+        }
+    ]
 }
+
 ```
 
 ## Galerie
@@ -107,4 +105,3 @@ Here are some settings that will be more or less self-explanatory (Note: There a
 
 <img src="https://github.com/CubesCoders/crust-gui/assets/34133543/7dfc557a-8296-4d59-be32-430d4cb5106e" width="500px" />
 <img src="https://github.com/CubesCoders/crust-gui/assets/34133543/8a6fc35b-0e5a-43bc-8d2b-a593e0dcf5a0" width="500px" />
-
