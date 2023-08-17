@@ -31,7 +31,9 @@ export async function add_workspace(path: string) {
     fetch_workspaces();
 }
 
-// TODO: add open function
+export async function open_project(id: String) {
+    invoke("open_project", { id: id });
+}
 
 export async function fetch_config() {
     const ret = await invoke('get_config');

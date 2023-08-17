@@ -6,6 +6,7 @@ use serde_json::{from_str, to_string};
 #[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct Config {
     pub project_types: Option<Vec<ProjectType>>,
+    pub run_configs: Option<Vec<RunConfig>>,
 }
 
 impl Config {
@@ -42,4 +43,12 @@ pub struct ProjectType {
     pub name: String,
     pub needed_files: Option<Vec<String>>,
     pub color: Option<String>,
+    pub run_config_id: Option<String>,
+}
+
+#[derive(Debug, Deserialize, Clone, Serialize)]
+pub struct RunConfig {
+    pub id: String,
+    pub name: String,
+    pub commands: String,
 }

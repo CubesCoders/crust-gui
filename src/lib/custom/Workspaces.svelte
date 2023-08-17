@@ -1,7 +1,6 @@
 <script lang="ts">
     import Button from "$components/ui/button/Button.svelte";
-    import { invoke } from "@tauri-apps/api";
-    import { config, delete_workspace, reindex_workspace, storeLoaded, workspaces } from "../stores/app_store";
+    import { config, delete_workspace, open_project, reindex_workspace, storeLoaded, workspaces } from "../stores/app_store";
 
     export let editable = false;
     export let selected_project_id = "-1";
@@ -81,7 +80,7 @@
                                 class="flex text-muted-foreground cursor-pointer hover:text-foreground select-none"
                                 class:text-muted-foreground={selected_project_id !==
                                     project.id}
-                                on:click={() => invoke("open_project", { id: project.id })} 
+                                on:click={() => open_project(project.id)} 
                             >
                                 <p class="w-44">{project.name}</p>
                                 {#if $config.project_types}

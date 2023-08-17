@@ -1,8 +1,7 @@
 <script lang="ts">
     import Button from "$components/ui/button/Button.svelte";
     import Workspaces from "$lib/custom/Workspaces.svelte";
-    import { storeLoaded} from "$lib/stores/app_store";
-    import { invoke } from "@tauri-apps/api";
+    import { open_project, storeLoaded} from "$lib/stores/app_store";
     import { Settings2Icon } from "lucide-svelte";
 
     let search_input: HTMLInputElement;
@@ -45,7 +44,7 @@
                     "Open in vscode " +
                         selectable_projects[selected_project_index].name
                 );
-                invoke("open_project", { id: selected_project_id });
+                open_project(selected_project_id);
             }
         }
     }
@@ -86,7 +85,7 @@
                 <Button
                     variant="outline"
                     class="p-2"
-                    href="/edit"
+                    href="/settings"
                     ><Settings2Icon /></Button
                 >
             </div>

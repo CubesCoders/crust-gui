@@ -19,7 +19,8 @@ declare namespace App {
     }
 
     interface Config {
-        project_types: ProjectType[]?,
+        project_types?: ProjectType[],
+        run_configs?: RunConfig[],
     }
 
     interface ProjectType {
@@ -27,6 +28,13 @@ declare namespace App {
         name: string,
         needed_files?: string[],
         color?: string,
+        run_config_id?: string,
+    }
+
+    interface RunConfig {
+        id: string,
+        name: string,
+        commands: string,
     }
 
     enum MessageType {

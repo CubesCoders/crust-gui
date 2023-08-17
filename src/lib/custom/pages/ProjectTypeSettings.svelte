@@ -1,22 +1,14 @@
 <script lang="ts">
-    import Button from "$components/ui/button/Button.svelte";
-    import { Tabs } from "$components/ui/tabs";
-    import TabsContent from "$components/ui/tabs/TabsContent.svelte";
-    import TabsList from "$components/ui/tabs/TabsList.svelte";
-    import TabsTrigger from "$components/ui/tabs/TabsTrigger.svelte";
-    import Workspaces from "$lib/custom/Workspaces.svelte";
-    import AddWorkspace from "$lib/custom/sheets/AddWorkspace.svelte";
-    import ColorPicker from 'svelte-awesome-color-picker';
-    import {
-        config,
-        storeLoaded,
-        save_config,
-    } from "$lib/stores/app_store";
-    import { ChevronLeftIcon, TrashIcon } from "lucide-svelte";
-    import Wrapper from "$lib/custom/color_picker/Wrapper.svelte";
-    import Input from "$lib/custom/color_picker/Input.svelte";
-    import TextInput from "$lib/custom/color_picker/TextInput.svelte";
-    import AddProjectType from "$lib/custom/sheets/AddProjectType.svelte";
+    import { Button } from "$components/ui/button";
+    import { config, save_config } from "$lib/stores/app_store";
+    import { TrashIcon } from "lucide-svelte";
+    import ColorPicker from "svelte-awesome-color-picker";
+    import AddProjectType from "../sheets/AddProjectType.svelte";
+    import Wrapper from "../color_picker/Wrapper.svelte";
+    import Input from "../color_picker/Input.svelte";
+    import TextInput from "../color_picker/TextInput.svelte";
+
+
 
     function onChange(p: App.ProjectType) {
         config.update((n) => {
@@ -44,22 +36,10 @@
     function focusNewInput(el: HTMLInputElement) {
         if (el.value === "") el.focus();
     }
+
 </script>
 
-<Button variant="outline" class="p-2 mb-2" href="/"><ChevronLeftIcon /></Button>
-{#if $storeLoaded}
-    <Tabs value="workspaces" class="w-full">
-        <TabsList class="grid w-full grid-cols-2 sticky top-2 z-40">
-            <TabsTrigger value="workspaces">Workspaces</TabsTrigger>
-            <TabsTrigger value="project-types">Project Types</TabsTrigger>
-        </TabsList>
-        <TabsContent value="workspaces" class="h-full overflow-hidden">
-            <AddWorkspace />
-            <hr class="my-4" />
-            <Workspaces editable={true} />
-        </TabsContent>
-        <TabsContent value="project-types">
-            <AddProjectType />
+<AddProjectType />
             {#if $config.project_types}
                 {#each $config.project_types as p, i}
                     <div class="relative">
@@ -89,9 +69,25 @@
                         <Button variant="outline" size="sm" class="ms-4 mt-1" on:click={() => {p.needed_files = p.needed_files ? [...p.needed_files, ""] : [""]}}
                             >Add needed file</Button
                         >
+                        
+                    {#if $config.run_configs}
+                    <p class="mt-1">
+                        Run Config:
+                        <select
+                            class="cursor-pointer border bg-background rounded"
+                            on:change={(e) => {
+                                p.run_config_id = e.currentTarget.value;
+                                onChange(p)
+                            }}
+                            value={p.run_config_id ?? ""}
+                        >
+                            <option value="">None</option>
+                            {#each $config.run_configs as run_config}
+                                <option value="{run_config.id}">{run_config.name}</option>
+                            {/each}
+                        </select>
+                    </p>
+                {/if}
                     </div>
                 {/each}
             {/if}
-        </TabsContent>
-    </Tabs>
-{/if}

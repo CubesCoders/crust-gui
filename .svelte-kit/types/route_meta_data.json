@@ -3,7 +3,7 @@
 		"src/routes/+layout.ts",
 		"src/routes/+layout.ts"
 	],
-	"/edit": [
+	"/settings": [
 		"src/routes/+layout.ts"
 	]
 }

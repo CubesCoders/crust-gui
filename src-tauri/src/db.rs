@@ -127,7 +127,7 @@ pub struct Project {
     pub id: String,
     pub name: String,
     workspace_id: String,
-    metadata: String,
+    pub metadata: String,
 }
 
 impl From<String> for Project {

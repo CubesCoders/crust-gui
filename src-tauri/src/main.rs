@@ -61,29 +61,17 @@ fn add_workspace(path: String, app_state: State<AppState>) {
     
     let mut projects: Vec<Project> = vec![];
 
-    for entry in jwalk::WalkDir::new(&path).max_depth(1).into_iter().flatten() {
+    for entry in jwalk::WalkDir::new(&path).min_depth(1).max_depth(1).into_iter().flatten() {
         if entry.file_type.is_dir() {
             let project_name = entry.file_name.to_string_lossy().to_string();
             let project_path = entry.path();
             let mut project_type = "";
 
-            /* if app_state_guard.config.project_types.is_some() {
-                let pts = app_state_guard.config.project_types.clone().unwrap();
-                pts.iter().for_each(|pt| {
-                    pt.to_owned().needed_files.and_then(|files| {
-                        if files.iter().all(|p| project_path.join(p).exists()) {
-                            project_type = &pt.id;
-                        }
-                        Some(())
-                    });
-                });
-            } */
-
             if let Some(project_types) = &app_state_guard.config.project_types {
                 for pt in project_types {
                     if let Some(files) = &pt.needed_files {
                         if files.iter().all(|p| project_path.join(p).exists()) {
-                            project_type = &pt.id;
+                            project_type = &pt.id; // TODO: deny undefined
                             break;  // Exit the loop if a matching project type is found
                         }
                     }
@@ -123,7 +111,6 @@ fn delete_project(id: String, app_state: State<AppState>) -> bool {
 
 #[tauri::command]
 fn open_project(id: String, app_state: State<AppState>) {
-    // TODO: open projects in different ways e.g. tauri: root, src-tauri; rust: root; (stored in config)
     // retrieve project
     let mut root_path: PathBuf;
 
@@ -132,14 +119,41 @@ fn open_project(id: String, app_state: State<AppState>) {
         let wksps: Vec<Workspace> = wksps_cache.iter().filter(|w| w.projects.clone().is_some_and(|ps| ps.iter().any(|p| p.id == id))).cloned().collect();
         if let Some(workspace) = wksps.first() {
             root_path = PathBuf::from(workspace.path.as_str());
+            let mut cmds = "";
+
             if let Some(projects) = &workspace.projects {
                 let ps = projects.iter().filter(|p| p.id == id).cloned().collect::<Vec<Project>>();
                 let project = ps.first().unwrap();
                 root_path.push(project.name.as_str());
+
+                if let Some(project_types) = &app_state_guard.config.project_types {
+                    if let Some(project_type) = project_types.iter().find(|pt| pt.id == project.metadata) {
+                        if let Some(run_configs) = &app_state_guard.config.run_configs {
+                            if let Some(run_config_id) = &project_type.run_config_id {
+                                if let Some(run_cfg) = run_configs.iter().find(|cfg| cfg.id.as_str() == run_config_id.as_str()) {
+                                    cmds = run_cfg.commands.as_str();
+                                }
+                            }
+                        }
+                    }
+                }
             }
 
-            println!("{:?}", root_path);
-            Command::new("cmd").arg("/c").arg("code").arg(&root_path).spawn().expect("Couldn't run vscode command!");
+            if cmds == "" {
+                if cfg!(target_os = "windows") { 
+                    Command::new("cmd").arg("/c").arg("explorer").arg(&root_path).spawn().expect("Couldn't run explorer command!");
+                } else {
+                    Command::new("sh").arg("-c").arg("open").arg(&root_path).spawn().expect("Couldn't run explorer command!"); // TODO: testing this (especially on mac)
+                }
+            } else {
+                for cmd_line in cmds.split("\n") {
+                    if cfg!(target_os = "windows") { 
+                        Command::new("cmd").arg("/c").arg(cmd_line.replace("$PPATH", &root_path.to_string_lossy().to_string())).spawn().expect("Couldn't run run_config command!");
+                    } else {
+                        Command::new("sh").arg("-c").arg(cmd_line.replace("$PPATH", &root_path.to_string_lossy().to_string())).spawn().expect("Couldn't run run_config command!");
+                    }
+                }
+            }
         }
     }
 }
