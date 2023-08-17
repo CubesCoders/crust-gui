@@ -3,6 +3,7 @@
 
 # Production
 /build
+/.svelte-kit
 
 # Documents
 /showcase
@@ -13,6 +14,10 @@
 
 # Misc
 .DS_Store
+
+
+# Environment
+.env
 .env.local
 .env.development.local
 .env.test.local
@@ -24,3 +29,9 @@ yarn-error.log*
 
 .vscode
 examples
+
+
+/package
+
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
