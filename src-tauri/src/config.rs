@@ -24,7 +24,12 @@ impl Config {
             file.write_all(contents.as_bytes()).expect("Couldn't write empty config!");
         }
 
-        from_str(&contents).expect("Couldn't deserialize config file!")
+        let mut cfg: Config = from_str(&contents).expect("Couldn't deserialize config file!");
+        let mut array = get_default_project_types();
+        array.append(&mut cfg.project_types.unwrap_or_default());
+        cfg.project_types = Some(array);
+
+        cfg
     }
 
     pub fn save(&self) {
@@ -33,7 +38,10 @@ impl Config {
         exe_dir.push("config.json");
         let mut file = File::create(exe_dir).unwrap();
 
-        file.write_all(to_string(self).unwrap().as_bytes()).expect("Couldn't write to file!");
+        let mut cfg = self.clone();
+        cfg.project_types = Some(cfg.project_types.unwrap().iter().filter(|pt| pt.id.len() > 2).cloned().collect::<Vec<ProjectType>>());
+
+        file.write_all(to_string(&cfg).unwrap().as_bytes()).expect("Couldn't write to file!");
     }
 }
 
@@ -51,4 +59,10 @@ pub struct RunConfig {
     pub id: String,
     pub name: String,
     pub commands: String,
+}
+
+fn get_default_project_types() -> Vec<ProjectType> {
+    let mut array: Vec<ProjectType> = vec![];
+    array.push(ProjectType { id: "0".to_owned(), name: "undef.".to_owned(), needed_files: Some(vec!["".to_owned()]), color: None, run_config_id: None });
+    array
 }

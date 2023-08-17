@@ -45,6 +45,14 @@ export async function save_config(config: App.Config) {
     await invoke('save_config', { config: config });
 }
 
+export async function get_project_type_id() {
+    return await invoke("get_uuid");
+}
+
+export function is_default_pt(id: string) {
+    return id.length < 2;
+}
+
 export function launch_alert(type: "default" | "destructive" | null | undefined, title: string, message: string, duration?: number) {
     alert.set({type, title, content: message});
     setTimeout(() => {

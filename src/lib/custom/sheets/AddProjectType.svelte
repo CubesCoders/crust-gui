@@ -1,37 +1,50 @@
 <script lang="ts">
     import Button from "$components/ui/button/Button.svelte";
     import { XIcon } from "lucide-svelte";
-    import { config, launch_alert, save_config } from "$lib/stores/app_store";
+    import { config, get_project_type_id, launch_alert, save_config } from "$lib/stores/app_store";
     import ColorPicker from "svelte-awesome-color-picker";
     import Wrapper from "../color_picker/Wrapper.svelte";
     import TextInput from "../color_picker/TextInput.svelte";
     import Input from "../color_picker/Input.svelte";
     import CustomSheet from "./CustomSheet.svelte";
+    import { onMount } from "svelte";
 
     let p: App.ProjectType = {
-        id: $config.project_types?.length.toString() ?? "0",
+        id: "-1",
         name: "",
         needed_files: [""],
-        color: "#fff",
+        color: "#ffffff",
         run_config_id: "",
     };
     let error = 0;
+    set_id()
+
+    async function set_id() {
+        p.id = String(await get_project_type_id())
+        console.log(p.id)
+    }
 
     function submit() {
-        if (p.name !== "") {
-            p.needed_files = p.needed_files?.filter((v, i, a) => v !== "");
-            $config.project_types = $config.project_types
-                ? [...$config.project_types, p]
-                : [p];
-            save_config($config);
-            launch_alert(
-                "default",
-                "Success",
-                `Successfully added '${p.name}' as project type!`
-            );
+        if (p.id != "-1") {
+            if (p.name !== "") {
+                p.needed_files = p.needed_files?.filter((v, i, a) => v !== "");
+                $config.project_types = $config.project_types
+                    ? [...$config.project_types, p]
+                    : [p];
+                save_config($config);
+                launch_alert(
+                    "default",
+                    "Success",
+                    `Successfully added '${p.name}' as project type!`
+                );
+                return true;
+            } else {
+                error = 1;
+            }
         } else {
-            error = 1;
+            error = 2;
         }
+        return false;
     }
 
     function focusNewInput(el: HTMLInputElement) {
@@ -41,7 +54,19 @@
 
 <CustomSheet
     onClose={() => {
-        submit();
+        let ok = submit();
+        if (!ok) return false;
+        // cleanup
+        p = {
+            id: "-1",
+            name: "",
+            needed_files: [""],
+            color: "#ffffff",
+            run_config_id: "",
+        };
+        error = 0;
+        set_id()
+        return true;
     }}
 >
     <span slot="button">Add project type</span>
@@ -68,7 +93,7 @@
             />
         </p>
         {#if error === 1}
-            <p class="text-destructive ms-16 mb-2">You have to set a name!</p>
+            <p class="text-destructive ms-16">You have to set a name!</p>
         {/if}
         <ColorPicker
             bind:hex={p.color}

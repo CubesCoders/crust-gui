@@ -1,13 +1,12 @@
 <script lang="ts">
     import { Button } from "$components/ui/button";
-    import { config, save_config } from "$lib/stores/app_store";
+    import { config, is_default_pt, save_config } from "$lib/stores/app_store";
     import { TrashIcon } from "lucide-svelte";
     import ColorPicker from "svelte-awesome-color-picker";
     import AddProjectType from "../sheets/AddProjectType.svelte";
     import Wrapper from "../color_picker/Wrapper.svelte";
     import Input from "../color_picker/Input.svelte";
     import TextInput from "../color_picker/TextInput.svelte";
-
 
 
     function onChange(p: App.ProjectType) {
@@ -43,9 +42,11 @@
             {#if $config.project_types}
                 {#each $config.project_types as p, i}
                     <div class="relative">
-                        <div class="absolute top-5 right-0">
-                            <Button variant="destructive" class="text-xs px-2" on:click={() => deleteProjectType(p)}><TrashIcon /></Button>
-                        </div>
+                        {#if !is_default_pt(p.id)}
+                            <div class="absolute top-5 right-0">
+                                <Button variant="destructive" class="text-xs px-2" on:click={() => deleteProjectType(p)}><TrashIcon /></Button>
+                            </div>
+                        {/if}
                         <hr class="my-4" />
                         <p>
                             Project type name:<input
@@ -62,13 +63,15 @@
                         {#if p.needed_files}
                             {#each p.needed_files as file}
                                 <p class="ps-4 text-muted-foreground">
-                                    - <input class="text-muted-foreground w-56 bg-transparent ms-1 mt-1 border px-1 rounded" bind:value={file} use:focusNewInput on:change={(e) => onChange(p)} >
+                                    - <input class="text-muted-foreground w-56 bg-transparent ms-1 mt-1 border px-1 rounded" bind:value={file} use:focusNewInput on:change={(e) => onChange(p)} disabled={is_default_pt(p.id)} > 
                                 </p>
                             {/each}
                         {/if}
-                        <Button variant="outline" size="sm" class="ms-4 mt-1" on:click={() => {p.needed_files = p.needed_files ? [...p.needed_files, ""] : [""]}}
-                            >Add needed file</Button
-                        >
+                        {#if !is_default_pt(p.id)}
+                            <Button variant="outline" size="sm" class="ms-4 mt-1" on:click={() => {p.needed_files = p.needed_files ? [...p.needed_files, ""] : [""]}}
+                                >Add needed file</Button
+                            >
+                        {/if}
                         
                     {#if $config.run_configs}
                     <p class="mt-1">

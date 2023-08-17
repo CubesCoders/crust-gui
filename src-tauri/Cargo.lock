@@ -505,6 +505,7 @@ dependencies = [
  "sysinfo",
  "tauri",
  "tauri-build",
+ "uuid",
 ]
 
 [[package]]

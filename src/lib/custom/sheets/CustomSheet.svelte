@@ -2,7 +2,7 @@
     import Button from "$components/ui/button/Button.svelte";
     import { XIcon } from "lucide-svelte";
 
-    export let onClose: () => void;
+    export let onClose: () => boolean;
 
     let modal: HTMLDivElement;
     let modal_background: HTMLDivElement;
@@ -26,7 +26,7 @@
 <Button variant="outline" on:click={open}><slot name="button" /></Button>
 
 
-<div class="absolute top-0 left-0 w-full h-full backdrop-filter backdrop-blur-sm bg-background/80 hidden z-50" bind:this={modal_background}>
+<div class="absolute top-0 left-0 w-full h-full backdrop-blur-sm bg-background/80 hidden z-50" bind:this={modal_background}>
     <div class="w-3/4 max-w-2xl h-screen bg-background border-e p-5 transition-transform duration-300 -translate-x-full" bind:this={modal}>
         <button class="float-right" on:click={close}><XIcon /></button>
         <p class="text-lg font-semibold">
@@ -34,7 +34,9 @@
         </p>
         <span class="clear-both"></span>
         <slot />
-        <Button type="submit" size="sm" class="mt-4" on:click={(e) => {onClose(); close();}}>Add</Button>
+        <Button type="submit" size="sm" class="mt-4" on:click={(e) => {
+            if (onClose()) close();
+        }}>Add</Button>
     </div>
     <!-- svelte-ignore a11y-click-events-have-key-events -->
     <div class="grow" on:click={close}></div>

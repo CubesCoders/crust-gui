@@ -9,6 +9,7 @@ use config::Config;
 use db::{DB, Workspace, Project, hash};
 use sysinfo::{System, SystemExt, DiskExt};
 use tauri::State;
+use uuid::Uuid;
 
 mod db;
 mod config;
@@ -65,25 +66,26 @@ fn add_workspace(path: String, app_state: State<AppState>) {
         if entry.file_type.is_dir() {
             let project_name = entry.file_name.to_string_lossy().to_string();
             let project_path = entry.path();
-            let mut project_type = "";
+            let mut project_type_options: Vec<&str> = vec![];
 
             if let Some(project_types) = &app_state_guard.config.project_types {
                 for pt in project_types {
                     if let Some(files) = &pt.needed_files {
                         if files.iter().all(|p| project_path.join(p).exists()) {
-                            project_type = &pt.id; // TODO: deny undefined
-                            break;  // Exit the loop if a matching project type is found
+                            project_type_options.push(&pt.id);
                         }
                     }
                 }
             }
 
-            if !project_type.is_empty() {
+            project_type_options.reverse();
+
+            if !project_type_options.is_empty() {
                 projects.push((
                     hash(project_path.to_string_lossy().to_string()).to_string(),
                     workspace.id.clone(),
                     project_name,
-                    project_type.to_owned()
+                    project_type_options.first().unwrap().to_string()
                 ).into());
             }
         }
@@ -179,13 +181,18 @@ fn exit(app_state: State<AppState>, window: tauri::Window) {
     let _ = window.close();
 }
 
+#[tauri::command]
+fn get_uuid() -> String {
+    Uuid::new_v4().to_string()
+}
+
 fn main() {
     tauri::Builder::default()
         .setup(|_app| {
             Ok(())
         })
         .manage(AppState(Arc::new(Mutex::new(MyAppState::new()))))
-        .invoke_handler(tauri::generate_handler![get_drives, get_workspaces, add_workspace, delete_project, delete_workspace, open_project, get_config, save_config, exit])
+        .invoke_handler(tauri::generate_handler![get_drives, get_workspaces, add_workspace, delete_project, delete_workspace, open_project, get_config, save_config, exit, get_uuid])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
