@@ -7,6 +7,7 @@
     import Wrapper from "../color_picker/Wrapper.svelte";
     import Input from "../color_picker/Input.svelte";
     import TextInput from "../color_picker/TextInput.svelte";
+    import Helper from "../utils/Helper.svelte";
 
     function onChange(p: App.ProjectType) {
         config.update((n) => {
@@ -60,7 +61,7 @@
                         <ColorPicker
                             bind:hex={p.color}
                             on:input={(e) => onChange(p)}
-                            label="Color:"
+                            label={p.name}
                             components={{
                                 wrapper: Wrapper,
                                 textInput: TextInput,
@@ -102,7 +103,7 @@
                 </div>
                 <div class="grow grid gap-2">
                     <div>
-                        <p>Needs files:</p>
+                        <p>Criteria Files:</p>
                         <div class="grid gap-1">
                             {#if p.needed_files}
                                 {#each p.needed_files as file}
@@ -128,7 +129,7 @@
                                 p.needed_files = p.needed_files
                                     ? [...p.needed_files, ""]
                                     : [""];
-                            }}>Add needed file</Button
+                            }}>Add criteria file</Button
                         >
                     {/if}
                 </div>

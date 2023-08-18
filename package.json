@@ -17,6 +17,7 @@
     "clsx": "^2.0.0",
     "lucide-svelte": "^0.263.0",
     "radix-svelte": "^0.8.0",
+    "svelte-portal": "^2.2.0",
     "tailwind-merge": "^1.14.0",
     "tailwindcss-animate": "^1.0.6"
   },

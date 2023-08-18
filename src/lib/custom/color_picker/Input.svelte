@@ -15,13 +15,13 @@
 	on:mousedown|preventDefault={() => {
 		/* prevent default behavior on safari */
 	}}
-    class="cursor-pointer"
     class:nothing={isOpen}
 >
-    {label}
-	<div class="container inline relative">
+    Color:
+	<br>
+	<div class="container inline relative cursor-pointer">
 		<input
-            class="m-0 p-0 w-1 h-1 cursor-pointer rounded"
+            class="m-0 p-0 w-0 h-0 cursor-pointer rounded absolute left-2 top-2"
 			type="color"
 			value={hex}
 			on:click|preventDefault={() => {
@@ -32,8 +32,9 @@
 			}}
 			aria-haspopup="dialog"
 		/>
-		<div class="alpha rounded w-5 h-5 absolute bg-background top-0 left-4" />
-		<div class="color rounded w-5 h-5 absolute border border-muted-foreground top-0 left-4" style="background: {hex}" />
+		<div class="alpha rounded w-5 h-5 absolute bg-background top-0 left-0" />
+		<div class="color rounded w-5 h-5 absolute border border-muted-foreground top-0" style="background: {hex}" />
+		<p class="absolute bottom-0 left-7 w-max" style="color: {hex}">{label}</p>
 	</div>
 </label>
 

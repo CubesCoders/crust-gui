@@ -29,14 +29,20 @@
 <CustomSheet onClose={() => {return submit()}}>
     <span slot="button"><PlusIcon /></span>
     <span slot="title">Add run configuration</span>
-    <div>
-        <p class="text-sm text-muted-foreground mb-4">
-            Add a new run configuration that can be used to run projects specifically. <br>Use <span class="bg-accent rounded-sm px-1 text-foreground">$PPATH</span> to be replaced with the project path. 
-        </p>
-        <p class="underline">
-            Name:
+    <span slot="subtitle">
+        Add a new run configuration that can be used to run projects specifically.
+        <br>
+        Use <span class="bg-accent rounded-sm px-1 text-foreground">$PPATH</span> to be replaced with the project path.
+        <br>
+        All <span class="underline">underlined</span> fields must be filled out.
+    </span>
+    <div class="grid gap-2">
+        <div>
+            <p class="underline">
+                Name:
+            </p>
             <input
-                class="text-muted-foreground w-56 bg-transparent ms-2 border m-1 px-1 rounded"
+                class="text-muted-foreground w-56 bg-transparent border px-1 rounded"
                 class:border-destructive={error === 1}
                 bind:value={r.name}
                 on:change={() => {
@@ -47,13 +53,15 @@
                     }
                 }}
             />
-        </p>
-        {#if error === 1}
-            <p class="text-destructive ms-16 mb-2">You have to set a name!</p>
-        {/if}
-        <p class="underline">
-            Commands:
-        </p>
-        <Textarea placeholder={"code $PPATH\n..."} bind:value={r.commands} />
+            {#if error === 1}
+                <p class="text-destructive mb-2">You have to set a name!</p>
+            {/if}
+        </div>
+        <div>
+            <p class="underline">
+                Commands:
+            </p>
+            <Textarea placeholder={"code $PPATH\n..."} bind:value={r.commands} />
+        </div>
     </div>
 </CustomSheet>

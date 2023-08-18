@@ -17,7 +17,7 @@
 <Button variant="outline" class="p-2 mb-2" href="/"><ChevronLeftIcon /></Button>
 {#if $storeLoaded}
     <Tabs value="workspaces" class="w-full">
-        <TabsList class="grid w-full grid-cols-3 sticky top-2 z-40">
+        <TabsList class="grid w-full grid-cols-3">
             <TabsTrigger value="workspaces">Workspaces</TabsTrigger>
             <TabsTrigger value="project-types">Project Types</TabsTrigger>
             <!-- <TabsTrigger value="project-languages">Project Languages</TabsTrigger> -->

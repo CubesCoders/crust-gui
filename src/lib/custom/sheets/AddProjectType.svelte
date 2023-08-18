@@ -12,6 +12,7 @@
     import Input from "../color_picker/Input.svelte";
     import CustomSheet from "./CustomSheet.svelte";
     import { PlusIcon } from "lucide-svelte";
+    import Helper from "../utils/Helper.svelte";
 
     let p: App.ProjectType = {
         id: "-1",
@@ -46,15 +47,7 @@
         return false;
     }
 
-    function focusNewInput(el: HTMLInputElement) {
-        if (el.value === "") el.focus();
-    }
-</script>
-
-<CustomSheet
-    onClose={() => {
-        let ok = submit();
-        if (!ok) return false;
+    function clear() {
         // cleanup
         p = {
             id: "-1",
@@ -65,17 +58,30 @@
         };
         error = 0;
         set_id();
+    }
+
+    function focusNewInput(el: HTMLInputElement) {
+        if (el.value === "") el.focus();
+    }
+</script>
+
+<CustomSheet
+    onClose={() => {
+        let ok = submit();
+        if (!ok) return false;
+        clear();
         return true;
     }}
 >
     <span slot="button"><PlusIcon /></span>
     <span slot="title">Add project type</span>
+    <span slot="subtitle">
+        Add a new project type that can be used to auto-detect special projects in workspaces.
+        <br>
+        All <span class="underline">underlined</span> fields must be filled out.
+    </span>
     <div>
-        <p class="text-sm text-muted-foreground mb-4">
-            Add a new project type that can be used to auto-detect special
-            projects in workspaces.
-        </p>
-        <div class="flex gap-2 flex-col">
+        <div class="grid gap-2">
             <div>
                 <p class="underline">
                     Name:
@@ -98,7 +104,7 @@
             </div>
             <ColorPicker
                 bind:hex={p.color}
-                label="Color:"
+                label={p.name}
                 components={{
                     wrapper: Wrapper,
                     textInput: TextInput,
@@ -106,7 +112,7 @@
                 }}
             />
             <div>
-                <p>Needs files:</p>
+                <p>Criteria Files: <Helper><p><span class="font-bold text-foreground">Criteria files</span> are needed for the indexer to <span class="font-bold text-foreground">automatically assign</span> this project type! The indexer looks if these <span class="font-bold text-foreground">files (or directorys)</span> are <span class="font-bold text-foreground">matching</span>.</p></Helper></p>
                 {#if p.needed_files}
                     {#each p.needed_files as file}
                         <p class="ps-4 text-muted-foreground">
@@ -126,26 +132,26 @@
                         p.needed_files = p.needed_files
                             ? [...p.needed_files, ""]
                             : [""];
-                    }}>Add needed file</Button
+                    }}>Add criteria file</Button
                 >
             </div>
             {#if $config.run_configs}
                 <p class="mt-1">
-                    Run Config:
-                    <select
-                        class="cursor-pointer border bg-background rounded"
-                        on:change={(e) => {
-                            p.run_config_id = e.currentTarget.value;
-                        }}
-                    >
-                        <option value="">None</option>
-                        {#each $config.run_configs as run_config}
-                            <option value={run_config.id}
-                                >{run_config.name}</option
-                            >
-                        {/each}
-                    </select>
+                    Run Config: <Helper><p>Here you can define a <span class="font-bold text-foreground">run configuration</span>. This configuration will be <span class="font-bold text-foreground">executed</span> when you select a <span class="font-bold text-foreground">project with this project type</span>.</p></Helper>
                 </p>
+                <select
+                    class="cursor-pointer border bg-background rounded w-2/4"
+                    on:change={(e) => {
+                        p.run_config_id = e.currentTarget.value;
+                    }}
+                >
+                    <option value="">None</option>
+                    {#each $config.run_configs as run_config}
+                        <option value={run_config.id}
+                            >{run_config.name}</option
+                        >
+                    {/each}
+                </select>
             {/if}
         </div>
     </div>

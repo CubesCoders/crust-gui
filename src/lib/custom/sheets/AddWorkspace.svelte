@@ -11,6 +11,11 @@
 <CustomSheet onClose={() => {add_workspace(path); return true;}}>
     <span slot="button"><PlusIcon /></span>
     <span slot="title">Add workspace</span>
-    <p class="text-sm text-muted-foreground mb-4">Add a new workspace and the projects it contains</p>
+    <span slot="subtitle">
+        Add a new workspace and the projects it contains.
+        <br>
+        All <span class="underline">underlined</span> fields must be filled out.
+    </span>
+    <p class="underline">Path:</p>
     <DirChooser bind:path_str_copy={path} />
 </CustomSheet>

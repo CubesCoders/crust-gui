@@ -31,26 +31,32 @@
 <AddRunConfig />
 {#if $config.run_configs}
     {#each $config.run_configs as r}
-        <div class="relative">
-            <div class="absolute top-5 right-0">
-                <Button
-                    variant="destructive"
-                    class="text-xs px-2"
-                    on:click={() => deleteRunConfig(r)}><TrashIcon /></Button
-                >
-            </div>
+        <div>
             <hr class="my-4" />
-            <p>
-                Run config name:<input
-                    class="text-muted-foreground w-56 bg-transparent ms-2 border m-1 px-1 rounded"
-                    bind:value={r.name}
-                    on:change={(e) => onChange(r)}
-                />
-            </p>
-            <p>
-                Commands:
-            </p>
-            <Textarea placeholder={"code $PPATH\n..."} bind:value={r.commands} class="text-muted-foreground" on:change={() => onChange(r)} />
+            <div class="grid gap-2">
+                <div>
+                    <p>
+                        Run config name:
+                    </p>
+                    <input
+                        class="text-muted-foreground w-56 bg-transparent border px-1 rounded"
+                        bind:value={r.name}
+                        on:change={(e) => onChange(r)}
+                    />
+                </div>
+                <div>
+                    <p>
+                        Commands:
+                    </p>
+                    <Textarea placeholder={"code $PPATH\n..."} bind:value={r.commands} class="text-muted-foreground resize-none" on:change={() => onChange(r)} />
+                </div>
+                    <Button
+                        variant="destructive"
+                        size="sm"
+                        class="w-max"
+                        on:click={() => deleteRunConfig(r)}>Delete</Button
+                    >
+            </div>
         </div>
     {/each}
 {/if}
