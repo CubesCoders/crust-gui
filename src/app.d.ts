@@ -47,4 +47,9 @@ declare namespace App {
         title: string,
         content: string,
     }
+
+    interface FunctionResult {
+        Success?: any,
+        Error?: string,
+    }
 }

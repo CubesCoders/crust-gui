@@ -1,13 +1,11 @@
 <script lang="ts">
     import Button from "$components/ui/button/Button.svelte";
-    import { XIcon } from "lucide-svelte";
     import { config, get_project_type_id, launch_alert, save_config } from "$lib/stores/app_store";
     import ColorPicker from "svelte-awesome-color-picker";
     import Wrapper from "../color_picker/Wrapper.svelte";
     import TextInput from "../color_picker/TextInput.svelte";
     import Input from "../color_picker/Input.svelte";
     import CustomSheet from "./CustomSheet.svelte";
-    import { onMount } from "svelte";
 
     let p: App.ProjectType = {
         id: "-1",
@@ -32,11 +30,6 @@
                     ? [...$config.project_types, p]
                     : [p];
                 save_config($config);
-                launch_alert(
-                    "default",
-                    "Success",
-                    `Successfully added '${p.name}' as project type!`
-                );
                 return true;
             } else {
                 error = 1;

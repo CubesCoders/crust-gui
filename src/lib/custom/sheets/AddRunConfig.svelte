@@ -16,19 +16,16 @@
                 ? [...$config.run_configs, r]
                 : [r];
             save_config($config);
-            launch_alert(
-                "default",
-                "Success",
-                `Successfully added '${r.name}' as run config!`
-            );
+            return true;
         } else {
             error = 1;
         }
+        return false;
     }
 </script>
 
 
-<CustomSheet onClose={() => {submit()}}>
+<CustomSheet onClose={() => {return submit()}}>
     <span slot="button">Add run configuration</span>
     <span slot="title">Add run configuration</span>
     <div>

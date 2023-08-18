@@ -7,7 +7,7 @@
     export let search_str: string = "";
     export let selectable_projects: App.Project[] = [];
 
-    console.log($config)
+    // console.log($config)
 
     function filter_search(workspaces: App.Workspace[], search_value: string) {
         let workspaces_copy: App.Workspace[] = [];

@@ -7,7 +7,7 @@
 </script>
 
 
-<CustomSheet onClose={() => {add_workspace(path); launch_alert("default", "Success", `Successfully added '${path}' to workspaces!`)}}>
+<CustomSheet onClose={() => {add_workspace(path); return true;}}>
     <span slot="button">Add workspace</span>
     <span slot="title">Add workspace</span>
     <p class="text-sm text-muted-foreground mb-4">Add a new workspace and the projects it contains</p>

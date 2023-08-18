@@ -10,6 +10,7 @@ use db::{DB, Workspace, Project, hash};
 use sysinfo::{System, SystemExt, DiskExt};
 use tauri::State;
 use uuid::Uuid;
+use serde::Serialize;
 
 mod db;
 mod config;
@@ -28,6 +29,12 @@ impl MyAppState {
     }
 }
 
+#[derive(Debug, Serialize)]
+enum FunctionResult<T> {
+    Success(T),
+    Error(String),
+}
+
 #[tauri::command]
 fn get_drives() -> Vec<String> {
     let sys = System::new_all();
@@ -40,25 +47,33 @@ fn get_drives() -> Vec<String> {
 }
 
 #[tauri::command]
-fn get_workspaces(app_state: State<AppState>) -> Vec<Workspace> {
-    let mut app_state_guard = app_state.inner().0.lock().unwrap();
+fn get_workspaces(app_state: State<AppState>) -> FunctionResult<Vec<Workspace>> {
+    let mut app_state_guard = match app_state.inner().0.lock() {
+        Ok(lock) => lock,
+        Err(_) => return FunctionResult::Error("Failed to acquire lock on app_state".to_owned()),
+    };
+
     let mut workspaces = app_state_guard.db.select_workspaces();
     for workspace in &mut workspaces {
         workspace.projects = Some(app_state_guard.db.select_projects(workspace.id.clone()));
     }
     app_state_guard.workspaces_cache = Some(workspaces.clone());
-    workspaces
+    FunctionResult::Success(workspaces)
 }
 
 #[tauri::command]
-fn add_workspace(path: String, app_state: State<AppState>) {
-    let workspace: Workspace = if path.ends_with("/") { 
-        path.split("/").enumerate().filter(|(i, _)| *i != path.split("/").count() -1).map(|(_, g)| g).collect::<Vec<&str>>().join("/").into()
+fn add_workspace(path: String, app_state: State<AppState>) -> FunctionResult<usize> {
+    let workspace: Workspace = if path.ends_with("/") {
+        let path_segments: Vec<&str> = path.split("/").collect();
+        path_segments[..path_segments.len() - 1].join("/").into()
     } else {
         path.clone().into()
     };
 
-    let mut app_state_guard = app_state.inner().0.lock().unwrap();
+    let mut app_state_guard = match app_state.inner().0.lock() {
+        Ok(lock) => lock,
+        Err(_) => return FunctionResult::Error("Failed to acquire lock on app_state".to_owned()),
+    };
     
     let mut projects: Vec<Project> = vec![];
 
@@ -91,32 +106,53 @@ fn add_workspace(path: String, app_state: State<AppState>) {
         }
     }
 
-    projects.iter().for_each(|p| {
-        app_state_guard.db.insert_project(p.clone());
-    });
-    app_state_guard.db.insert_workspace(workspace);
+    for project in &projects {
+        app_state_guard.db.insert_project(project.clone());
+    }
+    
+    if !app_state_guard.db.insert_workspace(workspace) {
+        return FunctionResult::Error("Failed to insert workspace into the database".to_owned());
+    }
+
+    FunctionResult::Success(projects.len())
 }
 
 #[tauri::command]
-fn delete_workspace(id: String, app_state: State<AppState>) -> bool {
-    let mut app_state_guard = app_state.inner().0.lock().unwrap();
-    app_state_guard.db.delete_workspace(&id)
+fn delete_workspace(id: String, app_state: State<AppState>) -> FunctionResult<()> {
+    let mut app_state_guard = match app_state.inner().0.lock() {
+        Ok(lock) => lock,
+        Err(_) => return FunctionResult::Error("Failed to acquire lock on app_state".to_owned()),
+    };
+    if false == app_state_guard.db.delete_workspace(&id) {
+        return FunctionResult::Error(format!("Failed to delete workspace (id:{})", id));
+    }
+    FunctionResult::Success(())
 }
 
 // TODO: add reindex_workspace (NOT delete_workspace and add_workspace!) function
 
 #[tauri::command]
-fn delete_project(id: String, app_state: State<AppState>) -> bool {
-    let mut app_state_guard = app_state.inner().0.lock().unwrap();
-    app_state_guard.db.delete_project(&id)
+fn delete_project(id: String, app_state: State<AppState>) -> FunctionResult<()> {
+    let mut app_state_guard = match app_state.inner().0.lock() {
+        Ok(lock) => lock,
+        Err(_) => return FunctionResult::Error("Failed to acquire lock on app_state".to_owned()),
+    };
+    if false == app_state_guard.db.delete_project(&id) {
+        return FunctionResult::Error(format!("Failed to delete project (id:{})", id));
+    }
+    FunctionResult::Success(())
 }
 
 #[tauri::command]
-fn open_project(id: String, app_state: State<AppState>) {
+fn open_project(id: String, app_state: State<AppState>) -> FunctionResult<()> {
     // retrieve project
     let mut root_path: PathBuf;
 
-    let app_state_guard = app_state.inner().0.lock().unwrap();
+    let app_state_guard = match app_state.inner().0.lock() {
+        Ok(lock) => lock,
+        Err(_) => return FunctionResult::Error("Failed to acquire lock on app_state".to_owned()),
+    };
+
     if let Some(wksps_cache) = &app_state_guard.workspaces_cache {
         let wksps: Vec<Workspace> = wksps_cache.iter().filter(|w| w.projects.clone().is_some_and(|ps| ps.iter().any(|p| p.id == id))).cloned().collect();
         if let Some(workspace) = wksps.first() {
@@ -125,7 +161,10 @@ fn open_project(id: String, app_state: State<AppState>) {
 
             if let Some(projects) = &workspace.projects {
                 let ps = projects.iter().filter(|p| p.id == id).cloned().collect::<Vec<Project>>();
-                let project = ps.first().unwrap();
+                let project = match ps.first() {
+                    Some(project) => project,
+                    None => return FunctionResult::Error(format!("No project found for with id = {}", id)),
+                };
                 root_path.push(project.name.as_str());
 
                 if let Some(project_types) = &app_state_guard.config.project_types {
@@ -143,33 +182,50 @@ fn open_project(id: String, app_state: State<AppState>) {
 
             if cmds == "" {
                 if cfg!(target_os = "windows") { 
-                    Command::new("cmd").arg("/c").arg("explorer").arg(&root_path).spawn().expect("Couldn't run explorer command!");
+                    if let Err(e) = Command::new("cmd").arg("/c").arg("explorer").arg(&root_path).spawn() {
+                        return FunctionResult::Error(format!("Couldn't run project on default config: {}", e.to_string()))
+                    }
                 } else {
-                    Command::new("sh").arg("-c").arg("open").arg(&root_path).spawn().expect("Couldn't run explorer command!"); // TODO: testing this (especially on mac)
+                    if let Err(e) = Command::new("sh").arg("-c").arg("open").arg(&root_path).spawn() {
+                        return FunctionResult::Error(format!("Couldn't run project on default config: {}", e.to_string()))
+                    } // TODO: testing this (especially on mac)
                 }
             } else {
                 for cmd_line in cmds.split("\n") {
                     if cfg!(target_os = "windows") { 
-                        Command::new("cmd").arg("/c").arg(cmd_line.replace("$PPATH", &root_path.to_string_lossy().to_string())).spawn().expect("Couldn't run run_config command!");
+                        if let Err(e) = Command::new("cmd").arg("/c").args(cmd_line.replace("$PPATH", &root_path.to_string_lossy().to_string()).split(" ").collect::<Vec<&str>>()).spawn() {
+                            return FunctionResult::Error(format!("Couldn't run project on custom config (Command: {}): {}", cmd_line, e.to_string()))
+                        }
                     } else {
-                        Command::new("sh").arg("-c").arg(cmd_line.replace("$PPATH", &root_path.to_string_lossy().to_string())).spawn().expect("Couldn't run run_config command!");
+                        if let Err(e) = Command::new("sh").arg("-c").arg(cmd_line.replace("$PPATH", &root_path.to_string_lossy().to_string())).spawn() {
+                            return FunctionResult::Error(format!("Couldn't run project on custom config (Command: {}): {}", cmd_line, e.to_string()))
+                        }
                     }
                 }
             }
         }
     }
+
+    FunctionResult::Success(())
 }
 
 #[tauri::command]
-fn get_config(app_state: State<AppState>) -> Config {
-    let app_state_guard = app_state.inner().0.lock().unwrap();
-    app_state_guard.config.clone()
+fn get_config(app_state: State<AppState>) -> FunctionResult<Config> {
+    let app_state_guard = match app_state.inner().0.lock() {
+        Ok(lock) => lock,
+        Err(_) => return FunctionResult::Error("Failed to acquire lock on app_state".to_owned()),
+    };
+    FunctionResult::Success(app_state_guard.config.clone())
 }
 
 #[tauri::command]
-fn save_config(config: Config, app_state: State<AppState>) {
-    let mut app_state_guard = app_state.inner().0.lock().unwrap();
+fn save_config(config: Config, app_state: State<AppState>) -> FunctionResult<()> {
+    let mut app_state_guard = match app_state.inner().0.lock() {
+        Ok(lock) => lock,
+        Err(_) => return FunctionResult::Error("Failed to acquire lock on app_state".to_owned()),
+    };
     app_state_guard.config = config;
+    FunctionResult::Success(())
 }
 
 #[tauri::command]
