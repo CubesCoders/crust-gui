@@ -1,6 +1,7 @@
 <script lang="ts">
     import Textarea from "$components/ui/textarea/Textarea.svelte";
     import { config, launch_alert, save_config } from "$lib/stores/app_store";
+    import { PlusIcon } from "lucide-svelte";
     import CustomSheet from "./CustomSheet.svelte";
 
     let r: App.RunConfig = {
@@ -26,7 +27,7 @@
 
 
 <CustomSheet onClose={() => {return submit()}}>
-    <span slot="button">Add run configuration</span>
+    <span slot="button"><PlusIcon /></span>
     <span slot="title">Add run configuration</span>
     <div>
         <p class="text-sm text-muted-foreground mb-4">
