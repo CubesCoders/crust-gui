@@ -30,9 +30,9 @@ export async function delete_workspace(id: string) {
 
 
 export async function add_workspace(path: string) {
-    let add = unwrap_result(await invoke("add_workspace", { path: path }), "adding workspace");
+    let add = unwrap_result<number>(await invoke("add_workspace", { path: path }), "adding workspace");
     if (!add) return;
-    launch_alert("default", "Successfully added Workspace!", `${path}`);
+    launch_alert("default", "Successfully added Workspace!", `${path} with ${add} projects`);
     fetch_workspaces();
 }
 

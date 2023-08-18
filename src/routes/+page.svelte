@@ -17,9 +17,6 @@
     }
 
     function kDown(e: KeyboardEvent) {
-        if (e.repeat) {
-            return;
-        }
         if (selectable_projects.length > 1) {
             switch (e.code) {
                 case "ArrowDown":
@@ -40,10 +37,6 @@
         }
         if (search_value.length != 0 && selected_project_id.length != 0) {
             if (e.code == "Enter") {
-                console.log(
-                    "Open in vscode " +
-                        selectable_projects[selected_project_index].name
-                );
                 open_project(selected_project_id);
             }
         }

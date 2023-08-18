@@ -8,10 +8,10 @@
     import Input from "../color_picker/Input.svelte";
     import TextInput from "../color_picker/TextInput.svelte";
 
-
     function onChange(p: App.ProjectType) {
         config.update((n) => {
-            if (p.needed_files) p.needed_files = p.needed_files.filter((v, i, a) => v !== "");
+            if (p.needed_files)
+                p.needed_files = p.needed_files.filter((v, i, a) => v !== "");
             if (n.project_types)
                 n.project_types[
                     n.project_types.findIndex((v, i, a) => v.id === p.id) ?? -1
@@ -24,7 +24,8 @@
     function deleteProjectType(p: App.ProjectType) {
         config.update((n) => {
             if (n.project_types) {
-                let index = n.project_types.findIndex((v, i, a) => v.id === p.id) ?? -1;
+                let index =
+                    n.project_types.findIndex((v, i, a) => v.id === p.id) ?? -1;
                 n.project_types.splice(index, 1);
             }
             return n;
@@ -35,62 +36,103 @@
     function focusNewInput(el: HTMLInputElement) {
         if (el.value === "") el.focus();
     }
-
 </script>
 
 <AddProjectType />
-            {#if $config.project_types}
-                {#each $config.project_types as p, i}
-                    <div class="relative">
-                        {#if !is_default_pt(p.id)}
-                            <div class="absolute top-5 right-0">
-                                <Button variant="destructive" class="text-xs px-2" on:click={() => deleteProjectType(p)}><TrashIcon /></Button>
-                            </div>
-                        {/if}
-                        <hr class="my-4" />
+{#if $config.project_types}
+    {#each $config.project_types as p, i}
+        <div class="relative">
+            <hr class="my-4" />
+            <div class="flex gap-4">
+                <div class="grow grid gap-2">
+                    <div>
                         <p>
-                            Project type name:<input
-                                class="text-muted-foreground w-56 bg-transparent ms-2 border m-1 px-1 rounded"
-                                bind:value={p.name}
-                                on:change={(e) => onChange(p)}
-                            />
+                            Project type name:
                         </p>
-                        <div>
-                            <ColorPicker bind:hex={p.color} on:input={(e) => onChange(p)} label="Color:" components={{wrapper: Wrapper, textInput: TextInput, input: Input}} />
-                        </div>
-                        <p class="text-muted-foreground" />
-                        <p>Needs files:</p>
-                        {#if p.needed_files}
-                            {#each p.needed_files as file}
-                                <p class="ps-4 text-muted-foreground">
-                                    - <input class="text-muted-foreground w-56 bg-transparent ms-1 mt-1 border px-1 rounded" bind:value={file} use:focusNewInput on:change={(e) => onChange(p)} disabled={is_default_pt(p.id)} > 
-                                </p>
-                            {/each}
-                        {/if}
-                        {#if !is_default_pt(p.id)}
-                            <Button variant="outline" size="sm" class="ms-4 mt-1" on:click={() => {p.needed_files = p.needed_files ? [...p.needed_files, ""] : [""]}}
-                                >Add needed file</Button
-                            >
-                        {/if}
-                        
-                    {#if $config.run_configs}
-                    <p class="mt-1">
-                        Run Config:
-                        <select
-                            class="cursor-pointer border bg-background rounded"
-                            on:change={(e) => {
-                                p.run_config_id = e.currentTarget.value;
-                                onChange(p)
-                            }}
-                            value={p.run_config_id ?? ""}
-                        >
-                            <option value="">None</option>
-                            {#each $config.run_configs as run_config}
-                                <option value="{run_config.id}">{run_config.name}</option>
-                            {/each}
-                        </select>
-                    </p>
-                {/if}
+                        <input
+                            class="text-muted-foreground w-11/12 bg-transparent border px-1 rounded"
+                            bind:value={p.name}
+                            on:change={(e) => onChange(p)}
+                        />
                     </div>
-                {/each}
-            {/if}
+
+                    <div>
+                        <ColorPicker
+                            bind:hex={p.color}
+                            on:input={(e) => onChange(p)}
+                            label="Color:"
+                            components={{
+                                wrapper: Wrapper,
+                                textInput: TextInput,
+                                input: Input,
+                            }}
+                        />
+                    </div>
+
+                    {#if $config.run_configs}
+                        <p class="mt-1">
+                            Run Config:
+                            <select
+                                class="cursor-pointer border bg-background rounded"
+                                on:change={(e) => {
+                                    p.run_config_id = e.currentTarget.value;
+                                    onChange(p);
+                                }}
+                                value={p.run_config_id ?? ""}
+                            >
+                                <option value="">None</option>
+                                {#each $config.run_configs as run_config}
+                                    <option value={run_config.id}
+                                        >{run_config.name}</option
+                                    >
+                                {/each}
+                            </select>
+                        </p>
+                    {/if}
+
+                    {#if !is_default_pt(p.id)}
+                        <Button
+                                variant="destructive"
+                                size="sm"
+                                class="w-max"
+                                on:click={() => deleteProjectType(p)}
+                                >Delete</Button
+                            >
+                    {/if}
+                </div>
+                <div class="grow grid gap-2">
+                    <div>
+                        <p>Needs files:</p>
+                        <div class="grid gap-1">
+                            {#if p.needed_files}
+                                {#each p.needed_files as file}
+                                    <p class="ps-4 text-muted-foreground">
+                                        - <input
+                                            class="text-muted-foreground w-11/12 bg-transparent ms-1 mt-1 border px-1 rounded"
+                                            bind:value={file}
+                                            use:focusNewInput
+                                            on:change={(e) => onChange(p)}
+                                            disabled={is_default_pt(p.id)}
+                                        />
+                                    </p>
+                                {/each}
+                            {/if}
+                        </div>
+                    </div>
+                    {#if !is_default_pt(p.id)}
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            class="w-max"
+                            on:click={() => {
+                                p.needed_files = p.needed_files
+                                    ? [...p.needed_files, ""]
+                                    : [""];
+                            }}>Add needed file</Button
+                        >
+                    {/if}
+                </div>
+            </div>
+        </div>
+    {/each}
+{/if}

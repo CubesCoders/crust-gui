@@ -8,6 +8,7 @@
     let modal_background: HTMLDivElement;
 
     function open() {
+        modal_background.style.transform = `translateY(${document.documentElement.scrollTop}px)`
         document.documentElement.classList.add('overflow-hidden');
         modal_background.classList.replace('hidden', 'flex');
         setTimeout(() => {

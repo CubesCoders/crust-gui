@@ -77,8 +77,10 @@
                         {#each workspace.projects as project}
                             <!-- svelte-ignore a11y-click-events-have-key-events -->
                             <div
-                                class="flex text-muted-foreground cursor-pointer hover:text-foreground select-none"
+                                class="flex text-muted-foreground cursor-pointer hover:text-foreground hover:scale-[1.01] select-none"
                                 class:text-muted-foreground={selected_project_id !==
+                                    project.id}
+                                class:scale-[1.01]={selected_project_id ===
                                     project.id}
                                 on:click={() => open_project(project.id)} 
                             >
