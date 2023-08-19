@@ -3,6 +3,7 @@
     import { config, launch_alert, save_config } from "$lib/stores/app_store";
     import { PlusIcon } from "lucide-svelte";
     import CustomSheet from "./CustomSheet.svelte";
+    import Helper from "../utils/Helper.svelte";
 
     let r: App.RunConfig = {
         id: $config.run_configs?.length.toString() ?? "0",
@@ -32,8 +33,6 @@
     <span slot="subtitle">
         Add a new run configuration that can be used to run projects specifically.
         <br>
-        Use <span class="bg-accent rounded-sm px-1 text-foreground">$PPATH</span> to be replaced with the project path.
-        <br>
         All <span class="underline">underlined</span> fields must be filled out.
     </span>
     <div class="grid gap-2">
@@ -59,7 +58,7 @@
         </div>
         <div>
             <p class="underline">
-                Commands:
+                Commands: <Helper><p><span class="font-bold text-foreground">Commands</span> will be executed when <span class="font-bold text-foreground">running</span> a selected <span class="font-bold text-foreground">project</span>. Each new <span class="font-bold text-foreground">line</span> will be executed <span class="font-bold text-foreground">seperatly</span> as a new <span class="font-bold text-foreground">command</span>. <span class="bg-accent rounded-sm px-1 font-bold text-foreground">$PPATH</span> will be replaced with the <span class="font-bold text-foreground">project path</span>.</p></Helper>
             </p>
             <Textarea placeholder={"code $PPATH\n..."} bind:value={r.commands} />
         </div>
