@@ -1,10 +1,10 @@
 [package]
 name = "crust-gui"
-version = "0.0.0"
-description = "A Tauri App"
-authors = ["you"]
-license = ""
-repository = ""
+version = "0.1.1"
+description = "A simple project manager"
+authors = ["Markus Hamacher"]
+license = "MPLv2"
+repository = "https://github.com/CubesCoders/crust-gui"
 edition = "2021"
 rust-version = "1.57"
 
