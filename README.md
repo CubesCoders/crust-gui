@@ -17,7 +17,7 @@ Status of cross-platform can be found in [this issue](https://github.com/CubesCo
 
 ## Installation
 
-1. Download the latest release version of CRust.
+1. Download the latest [release](https://github.com/CubesCoders/crust-gui/releases/latest) version of CRust.
 2. Simply run the executable (or platform-specific application) to launch CRust.
 
 ## Contributing
