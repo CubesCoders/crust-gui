@@ -2,26 +2,27 @@
 
 CRust is a project manager written in Rust and built using Tauri. It allows you to efficiently manage your projects, workspaces, and project types. With a user-friendly graphical interface, CRust streamlines your project organization and development workflow.
 
-Note: Not yet tested on linux and mac (view progress on [this issue](https://github.com/CubesCoders/crust-gui/issues/2))
+Current [Roadmap](https://github.com/CubesCoders/crust-gui/issues/4)
+
+Status of cross-platform can be found in [this issue](https://github.com/CubesCoders/crust-gui/issues/2)
 
 ## Features
 
 - Add workspaces with project directories matching project type configurations.
 - Quicksearch for projects to easily locate and access them.
-- Run selected projects with Visual Studio Code (VSCode), assuming it's installed.
+- Run selected projects with custom run configurations (e.g. with vscode).
 - Manage workspaces by reindexing or deleting them.
 - Add, modify, or delete project types with customizable coloring.
-- Planned features: custom run configurations, enhanced workspace indexing, specific project language support (C++, Java, etc.), and more.
+- Planned features: enhanced workspace indexing, specific project language support (C++, Java, etc.), and more. (see roadmap)
 
 ## Installation
 
 1. Download the latest release version of CRust.
-2. Ensure you have Visual Studio Code (VSCode) installed.
-3. Simply run the executable (or platform-specific application) to launch CRust.
+2. Simply run the executable (or platform-specific application) to launch CRust.
 
 ## Contributing
 
-Contributions to CRust are highly welcome! Whether you're interested in contributing code, suggesting new features, discussing improvements, or participating in project discussions, your input is valuable.
+[Contributions](https://github.com/CubesCoders/crust-gui/issues/5) to CRust are highly welcome! Whether you're interested in contributing code, suggesting new features, discussing improvements, or participating in project discussions, your input is valuable.
 
 - Fork this repository and create a new branch for your contributions.
 - Submit pull requests to propose changes or additions.
