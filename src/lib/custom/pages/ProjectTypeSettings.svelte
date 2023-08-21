@@ -1,13 +1,11 @@
 <script lang="ts">
     import { Button } from "$components/ui/button";
     import { config, is_default_pt, save_config } from "$lib/stores/app_store";
-    import { TrashIcon } from "lucide-svelte";
     import ColorPicker from "svelte-awesome-color-picker";
     import AddProjectType from "../sheets/AddProjectType.svelte";
     import Wrapper from "../color_picker/Wrapper.svelte";
     import Input from "../color_picker/Input.svelte";
     import TextInput from "../color_picker/TextInput.svelte";
-    import Helper from "../utils/Helper.svelte";
 
     function onChange(p: App.ProjectType) {
         config.update((n) => {
@@ -41,7 +39,7 @@
 
 <AddProjectType />
 {#if $config.project_types}
-    {#each $config.project_types as p, i}
+    {#each $config.project_types.reverse() as p}
         <div class="relative">
             <hr class="my-4" />
             <div class="flex gap-4">
