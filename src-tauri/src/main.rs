@@ -3,9 +3,9 @@
     windows_subsystem = "windows"
 )]
 
-use std::{env, sync::{Arc, Mutex}, path::PathBuf, process::Command};
+use std::{env, sync::{Arc, Mutex}, path::PathBuf, process::Command, collections::HashMap};
 
-use config::Config;
+use config::{ConfigFile, Config};
 use db::{DB, Workspace, Project, hash};
 use sysinfo::{System, SystemExt, DiskExt};
 use tauri::State;
@@ -78,15 +78,57 @@ fn add_workspace(path: String, app_state: State<AppState>) -> FunctionResult<usi
     let mut projects: Vec<Project> = vec![];
 
     for entry in jwalk::WalkDir::new(&path).min_depth(1).max_depth(1).into_iter().flatten() {
-        if entry.file_type.is_dir() {
+        if entry.file_type.is_dir() { // Projects
             let project_name = entry.file_name.to_string_lossy().to_string();
             let project_path = entry.path();
             let mut project_type_options: Vec<&str> = vec![];
 
-            if let Some(project_types) = &app_state_guard.config.project_types {
+            let mut paths: Vec<String> = Vec::new(); // Path needed
+            let mut extensions: HashMap<String, usize> = HashMap::new(); // get count of available extensions
+
+            let excluded_dirs = app_state_guard.config.excluded_dirs.clone();
+
+            for entry in jwalk::WalkDir::new(&project_path).min_depth(1).process_read_dir(
+                move |_depth, _path, _read_dir_state, children| {
+                    children.iter_mut().for_each(
+                        |dir_entry_result| {
+                            if let Ok(dir_entry) = dir_entry_result {
+                                if excluded_dirs.iter().any(|excluded_dir| dir_entry.path().to_string_lossy().to_string().contains(excluded_dir)) {
+                                    dir_entry.read_children_path = None;
+                                }
+                            }
+                        }
+                    );
+            }).into_iter().flatten() {
+                paths.push(entry.path().to_string_lossy().to_string());
+                if entry.file_type.is_file() {
+                    if let Some(ext_wrapped) = entry.path().extension() {
+                        let ext = ext_wrapped.to_string_lossy().to_string();
+                        if app_state_guard.config.extensions.contains(&ext) {
+                            if extensions.contains_key(&ext) {
+                                extensions.insert(ext.clone(), extensions.get(&ext).unwrap() + 1);
+                            } else {
+                                extensions.insert(ext, 1);
+                            }
+                        }
+                    }
+                }
+            }
+
+            println!("{:#?}", extensions);
+
+            if let Some(project_types) = &app_state_guard.config.file.project_types {
                 for pt in project_types {
                     if let Some(files) = &pt.needed_files {
-                        if files.iter().all(|p| project_path.join(p).exists()) {
+                        if files.iter().all(|p| {
+                            let first = project_path.join(p).exists();
+                            let mut second = false;
+                            if p.contains("!ext:") {
+                                let extension = p.splitn(2, "!ext:").last().unwrap();
+                                second = extensions.contains_key(&extension.to_string());
+                            }
+                            first || second
+                        }) {
                             project_type_options.push(&pt.id);
                         }
                     }
@@ -167,9 +209,9 @@ fn open_project(id: String, app_state: State<AppState>) -> FunctionResult<()> {
                 };
                 root_path.push(project.name.as_str());
 
-                if let Some(project_types) = &app_state_guard.config.project_types {
+                if let Some(project_types) = &app_state_guard.config.file.project_types {
                     if let Some(project_type) = project_types.iter().find(|pt| pt.id == project.metadata) {
-                        if let Some(run_configs) = &app_state_guard.config.run_configs {
+                        if let Some(run_configs) = &app_state_guard.config.file.run_configs {
                             if let Some(run_config_id) = &project_type.run_config_id {
                                 if let Some(run_cfg) = run_configs.iter().find(|cfg| cfg.id.as_str() == run_config_id.as_str()) {
                                     cmds = run_cfg.commands.as_str();
@@ -210,21 +252,21 @@ fn open_project(id: String, app_state: State<AppState>) -> FunctionResult<()> {
 }
 
 #[tauri::command]
-fn get_config(app_state: State<AppState>) -> FunctionResult<Config> {
+fn get_config(app_state: State<AppState>) -> FunctionResult<ConfigFile> {
     let app_state_guard = match app_state.inner().0.lock() {
         Ok(lock) => lock,
         Err(_) => return FunctionResult::Error("Failed to acquire lock on app_state".to_owned()),
     };
-    FunctionResult::Success(app_state_guard.config.clone())
+    FunctionResult::Success(app_state_guard.config.file.clone())
 }
 
 #[tauri::command]
-fn save_config(config: Config, app_state: State<AppState>) -> FunctionResult<()> {
+fn update_config(config: ConfigFile, app_state: State<AppState>) -> FunctionResult<()> {
     let mut app_state_guard = match app_state.inner().0.lock() {
         Ok(lock) => lock,
         Err(_) => return FunctionResult::Error("Failed to acquire lock on app_state".to_owned()),
     };
-    app_state_guard.config = config;
+    app_state_guard.config.update(config);
     FunctionResult::Success(())
 }
 
@@ -232,7 +274,7 @@ fn save_config(config: Config, app_state: State<AppState>) -> FunctionResult<()>
 fn exit(app_state: State<AppState>, window: tauri::Window) {
     println!("Closing....");
     let app_state_guard = app_state.inner().0.lock().unwrap();
-    app_state_guard.config.save();
+    app_state_guard.config.file.save();
 
     let _ = window.close();
 }
@@ -248,7 +290,7 @@ fn main() {
             Ok(())
         })
         .manage(AppState(Arc::new(Mutex::new(MyAppState::new()))))
-        .invoke_handler(tauri::generate_handler![get_drives, get_workspaces, add_workspace, delete_project, delete_workspace, open_project, get_config, save_config, exit, get_uuid])
+        .invoke_handler(tauri::generate_handler![get_drives, get_workspaces, add_workspace, delete_project, delete_workspace, open_project, get_config, update_config, exit, get_uuid])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

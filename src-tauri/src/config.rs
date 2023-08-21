@@ -3,13 +3,69 @@ use std::{fs::{File, OpenOptions}, io::{Read, Write}, env};
 use serde::{Deserialize, Serialize};
 use serde_json::{from_str, to_string};
 
-#[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct Config {
+    pub file: ConfigFile,
+    pub excluded_dirs: Vec<String>,
+    pub extensions: Vec<String>,
+}
+
+impl Config {
+    pub fn new() -> Self {
+        let excluded_dirs: Vec<String> = vec![
+            ".github".to_owned(),
+            ".svelte-kit".to_owned(),
+            ".idea".to_owned(),
+            ".vscode".to_owned(),
+            "node_modules".to_owned(),
+        ];
+        let file = ConfigFile::new();
+        let mut extensions: Vec<String> = Vec::new();
+
+        for pt in file.project_types.clone().unwrap() { // Can't fail because of the default project types
+            if let Some(needed_files) = pt.needed_files {
+                for needed_file in needed_files {
+                    if needed_file.starts_with("!ext:") {
+                        let extension = needed_file.split("!ext:").enumerate().find(|(i, _p)| i.eq(&1)).unwrap().1;
+                        if !extensions.contains(&extension.to_string()) {
+                            extensions.push(extension.to_string());
+                        }
+                    }
+                }
+            }
+        }
+
+
+        Config {file, excluded_dirs, extensions}
+    }
+
+    pub fn update(&mut self, new_file: ConfigFile) {
+        let mut extensions: Vec<String> = Vec::new();
+
+        for pt in new_file.project_types.clone().unwrap() { // Can't fail because of the default project types
+            if let Some(needed_files) = pt.needed_files {
+                for needed_file in needed_files {
+                    if needed_file.starts_with("!ext:") {
+                        let extension = needed_file.split("!ext:").enumerate().find(|(i, _p)| i.eq(&1)).unwrap().1;
+                        if !extensions.contains(&extension.to_string()) {
+                            extensions.push(extension.to_string());
+                        }
+                    }
+                }
+            }
+        }
+
+        self.extensions = extensions;
+        self.file = new_file;
+    }
+}
+
+#[derive(Debug, Deserialize, Clone, Serialize)]
+pub struct ConfigFile {
     pub project_types: Option<Vec<ProjectType>>,
     pub run_configs: Option<Vec<RunConfig>>,
 }
 
-impl Config {
+impl ConfigFile {
     pub fn new() -> Self {
         let mut exe_dir = env::current_exe().expect("Failed to get exe directory!");
         exe_dir.pop();
@@ -24,7 +80,7 @@ impl Config {
             file.write_all(contents.as_bytes()).expect("Couldn't write empty config!");
         }
 
-        let mut cfg: Config = from_str(&contents).expect("Couldn't deserialize config file!");
+        let mut cfg: ConfigFile = from_str(&contents).expect("Couldn't deserialize config file!");
         let mut array = get_default_project_types();
         array.append(&mut cfg.project_types.unwrap_or_default());
         cfg.project_types = Some(array);
@@ -63,6 +119,17 @@ pub struct RunConfig {
 
 fn get_default_project_types() -> Vec<ProjectType> {
     let mut array: Vec<ProjectType> = vec![];
-    array.push(ProjectType { id: "0".to_owned(), name: "undef.".to_owned(), needed_files: Some(vec!["".to_owned()]), color: None, run_config_id: None });
+    array.push(default_project_type("0", "undef.", vec![""]));
+    array.push(default_project_type("1", "html", vec!["!ext:html"]));
+    array.push(default_project_type("2", "javascript", vec!["!ext:js"]));
+    array.push(default_project_type("3", "typescript", vec!["!ext:ts"]));
+    array.push(default_project_type("4", "web", vec!["!ext:html", "!ext:js"]));
+    array.push(default_project_type("5", "react", vec!["!ext:tsx"]));
+    array.push(default_project_type("6", "svelte", vec!["!ext:svelte", "svelte.config.js"]));
+    array.push(default_project_type("7", "c++", vec!["!ext:cpp"]));
     array
+}
+
+fn default_project_type(id: &str, name: &str, needed_files: Vec<&str>) -> ProjectType {
+    ProjectType { id: id.to_string(), name: name.to_string(), needed_files: Some(needed_files.iter().map(|f| f.to_string()).collect::<Vec<String>>()), color: None, run_config_id: None }
 }
