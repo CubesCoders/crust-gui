@@ -224,22 +224,22 @@ fn open_project(id: String, app_state: State<AppState>) -> FunctionResult<()> {
 
             if cmds == "" {
                 if cfg!(target_os = "windows") { 
-                    if let Err(e) = Command::new("cmd").arg("/c").arg("explorer").arg(&root_path).spawn() {
+                    if let Err(e) = Command::new("cmd").arg("/c").arg("explorer").arg(&root_path).output() {
                         return FunctionResult::Error(format!("Couldn't run project on default config: {}", e.to_string()))
                     }
                 } else {
-                    if let Err(e) = Command::new("sh").arg("-c").arg("open").arg(&root_path).spawn() {
+                    if let Err(e) = Command::new("sh").arg("-c").arg("open").arg(&root_path).output() {
                         return FunctionResult::Error(format!("Couldn't run project on default config: {}", e.to_string()))
                     } // TODO: testing this (especially on mac)
                 }
             } else {
                 for cmd_line in cmds.split("\n") {
                     if cfg!(target_os = "windows") { 
-                        if let Err(e) = Command::new("cmd").arg("/c").args(cmd_line.replace("$PPATH", &root_path.to_string_lossy().to_string()).split(" ").collect::<Vec<&str>>()).spawn() {
+                        if let Err(e) = Command::new("cmd").arg("/c").args(cmd_line.replace("$PPATH", &root_path.to_string_lossy().to_string()).split(" ").collect::<Vec<&str>>()).output() {
                             return FunctionResult::Error(format!("Couldn't run project on custom config (Command: {}): {}", cmd_line, e.to_string()))
                         }
                     } else {
-                        if let Err(e) = Command::new("sh").arg("-c").arg(cmd_line.replace("$PPATH", &root_path.to_string_lossy().to_string())).spawn() {
+                        if let Err(e) = Command::new("sh").arg("-c").arg(cmd_line.replace("$PPATH", &root_path.to_string_lossy().to_string())).output() {
                             return FunctionResult::Error(format!("Couldn't run project on custom config (Command: {}): {}", cmd_line, e.to_string()))
                         }
                     }
