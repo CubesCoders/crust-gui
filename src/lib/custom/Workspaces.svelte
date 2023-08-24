@@ -1,11 +1,30 @@
 <script lang="ts">
     import Button from "$components/ui/button/Button.svelte";
-    import { config, delete_workspace, open_project, reindex_workspace, storeLoaded, workspaces } from "../stores/app_store";
+    import {
+        config,
+        delete_workspace,
+        get_project_from_id,
+        open_project,
+        reindex_workspace,
+        storeLoaded,
+        workspaces,
+    } from "../stores/app_store";
+    import { onDestroy } from "svelte";
 
     export let editable = false;
     export let selected_project_id = "-1";
     export let search_str: string = "";
     export let selectable_projects: App.Project[] = [];
+
+    let last_opened = $config.last_opened
+        ? get_project_from_id($config.last_opened, $workspaces)
+        : undefined;
+
+    let unsubscirbe = config.subscribe((value) => {
+        last_opened = value.last_opened ? get_project_from_id(value.last_opened, $workspaces) : undefined;
+    });
+
+    onDestroy(unsubscirbe);
 
     // console.log($config)
 
@@ -41,6 +60,36 @@
 </script>
 
 {#if storeLoaded}
+    {#if $config.last_opened && !editable}
+        {#if last_opened !== undefined}
+            <p class="scroll-m-20 text-xl font-semibold tracking-tight pr-2">
+                Last Opened Project
+            </p>
+            <div class="ps-6 pb-6">
+                <!-- svelte-ignore a11y-click-events-have-key-events -->
+                <div
+                    class="flex text-muted-foreground cursor-pointer hover:text-foreground hover:scale-[1.01] select-none"
+                    class:text-muted-foreground={selected_project_id !==
+                        last_opened.id}
+                    class:scale-[1.01]={selected_project_id === last_opened.id}
+                    on:click={() => open_project(last_opened.id)}
+                >
+                    <p class="w-44">{last_opened.name}</p>
+                    {#if $config.project_types}
+                        <p
+                            style="color: {$config.project_types.find(
+                                (v, i, a) => v.id === last_opened.metadata
+                            )?.color};"
+                        >
+                            {$config.project_types.find(
+                                (v, i, a) => v.id === last_opened.metadata
+                            )?.name}
+                        </p>
+                    {/if}
+                </div>
+            </div>
+        {/if}
+    {/if}
     {#each filter_search($workspaces, search_str) as workspace}
         <div class="mb-2">
             <!-- <p>{workspace.id}; {workspace.path}</p> -->
@@ -66,7 +115,8 @@
                     <Button
                         variant="outline"
                         size="sm"
-                        on:click={(e) => reindex_workspace(workspace.id, workspace.path)}
+                        on:click={(e) =>
+                            reindex_workspace(workspace.id, workspace.path)}
                         >Reindex Workspace</Button
                     >
                 {/if}
@@ -82,14 +132,20 @@
                                     project.id}
                                 class:scale-[1.01]={selected_project_id ===
                                     project.id}
-                                on:click={() => open_project(project.id)} 
+                                on:click={() => open_project(project.id)}
                             >
                                 <p class="w-44">{project.name}</p>
                                 {#if $config.project_types}
                                     <p
-                                        style="color: {$config.project_types.find((v, i, a) => v.id === project.metadata)?.color};"
+                                        style="color: {$config.project_types.find(
+                                            (v, i, a) =>
+                                                v.id === project.metadata
+                                        )?.color};"
                                     >
-                                        {$config.project_types.find((v, i, a) => v.id === project.metadata)?.name}
+                                        {$config.project_types.find(
+                                            (v, i, a) =>
+                                                v.id === project.metadata
+                                        )?.name}
                                     </p>
                                 {/if}
                             </div>

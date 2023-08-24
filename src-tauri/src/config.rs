@@ -63,6 +63,7 @@ impl Config {
 pub struct ConfigFile {
     pub project_types: Option<Vec<ProjectType>>,
     pub run_configs: Option<Vec<RunConfig>>,
+    pub last_opened: Option<String>,
 }
 
 impl ConfigFile {

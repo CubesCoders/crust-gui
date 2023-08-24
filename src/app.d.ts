@@ -21,6 +21,7 @@ declare namespace App {
     interface Config {
         project_types?: ProjectType[],
         run_configs?: RunConfig[],
+        last_opened?: string,
     }
 
     interface ProjectType {

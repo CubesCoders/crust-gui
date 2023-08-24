@@ -36,9 +36,10 @@ export async function add_workspace(path: string) {
     fetch_workspaces();
 }
 
-export async function open_project(id: String) {
+export async function open_project(id: string) {
     const ret = unwrap_result(await invoke("open_project", { id: id }), "opening project");
     if (!ret) return;
+    config.update((v) => {v.last_opened = id; return v});
     launch_alert("default", "Successfully opened project", "");
 }
 
@@ -61,6 +62,17 @@ export async function get_project_type_id() {
 
 export function is_default_pt(id: string) {
     return id.length < 2;
+}
+
+export function get_project_from_id(id: string, workspaces: App.Workspace[]) {
+    for (let workspace of workspaces) {
+        let project = workspace.projects?.find((v, i, a) => v.id === id);
+        console.log(project);
+        if (project) {
+            return project;
+        }
+    }
+    return;
 }
 
 export function launch_alert(type: "default" | "destructive" | null | undefined, title: string, message: string, duration?: number) {

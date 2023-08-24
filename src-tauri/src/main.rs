@@ -190,7 +190,7 @@ fn open_project(id: String, app_state: State<AppState>) -> FunctionResult<()> {
     // retrieve project
     let mut root_path: PathBuf;
 
-    let app_state_guard = match app_state.inner().0.lock() {
+    let mut app_state_guard = match app_state.inner().0.lock() {
         Ok(lock) => lock,
         Err(_) => return FunctionResult::Error("Failed to acquire lock on app_state".to_owned()),
     };
@@ -247,6 +247,8 @@ fn open_project(id: String, app_state: State<AppState>) -> FunctionResult<()> {
             }
         }
     }
+
+    app_state_guard.config.file.last_opened = Some(id);
 
     FunctionResult::Success(())
 }
